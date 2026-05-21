@@ -1,57 +1,62 @@
 import streamlit as st
 
+
+
 def style_background_home():
 
     st.markdown("""
         <style>
 
-            .stApp {
-            background: #5865F2 !important;
-            }
-            
-            .stApp div[data-testid="stColumn"]{
+                .stApp {
+                    background: #5865F2 !important;
+                }
+
+                .stApp div[data-testid="stColumn"]{
                     background-color:#E0E3FF !important;
                     padding:2.5rem !important;
                     border-radius: 5rem !important;
                     }
-                
-        </style>
+        </style>  
 
-            """
+                """
             ,unsafe_allow_html=True)
     
+
 def style_background_dashboard():
 
     st.markdown("""
         <style>
 
-            .stApp {
-            background: #E0E3FF !important;
-            }
-                
-        </style>
+                .stApp {
+                    background: #E0E3FF !important;
+                }
 
-            """
+        </style>  
+
+                """
             ,unsafe_allow_html=True)
+    
+
+    
 
 def style_base_layout():
-
+# asdasd
     st.markdown("""
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979&display=swap');
-            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
                 
-            /* Hide Top Bar of streamlit */
-
+         /* Hide Top Bar of streamlit */
+                
             #MainMenu, footer, header {
-            visibility: hidden;
-
+                visibility: hidden;
             }
-
+                
             .block-container {
-             padding-top:1.5rem !important;
+                padding-top:1.5rem !important;    
             }
-                  
+
             h1 {
                 font-family: 'Climate Crisis', sans-serif !important;
                 font-size: 3.5rem !important;
@@ -71,7 +76,7 @@ def style_base_layout():
                 font-family: 'Outfit', sans-serif;    
             }
                 
-            
+
             button{
                 border-radius: 1.5rem !important;
                 background-color: #5865F2 !important;
@@ -101,8 +106,7 @@ def style_base_layout():
 
             button:hover{
                 transform :scale(1.05)}
-       
-        </style>
+        </style>  
 
-            """
+                """
             ,unsafe_allow_html=True)

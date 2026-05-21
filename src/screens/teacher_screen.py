@@ -1,47 +1,55 @@
 import streamlit as st
 
 from src.ui.base_layout import style_background_dashboard, style_base_layout
+
 from src.components.header import header_dashboard
 from src.components.footer import footer_dashboard
 from src.components.subject_card import subject_card
-from src.database.db import check_teacher_exists, create_teacher,teacher_login,get_teacher_subjects,get_attendance_for_teacher
+from src.database.db import check_teacher_exists, create_teacher, teacher_login, get_teacher_subjects, get_attendance_for_teacher
 from src.components.dialog_create_subject import create_subject_dialog
 from src.components.dialog_share_subject import share_subject_dialog
 from src.components.dialog_add_photo import add_photos_dialog
 
-from src.database.config import supabase
 from src.pipelines.face_pipeline import predict_attendance
-import numpy as np
 from src.components.dialog_attendance_results import attendance_result_dialog
-from src.components.dialog_voice_attendance import voice_attendance_dialog
+import numpy as np
 
 from datetime import datetime
 
 import pandas as pd
 
+from src.database.config import supabase
+
+
+from src.components.dialog_voice_attendance import voice_attendance_dialog
 def teacher_screen():
 
     style_background_dashboard()
     style_base_layout()
-    
+
     if "teacher_data" in st.session_state:
         teacher_dashboard()
     elif 'teacher_login_type' not in st.session_state or st.session_state.teacher_login_type=="login":
         teacher_screen_login()
     elif st.session_state.teacher_login_type == "register":
         teacher_screen_register()
-    
+
+
+
+
+
 def teacher_dashboard():
     teacher_data = st.session_state.teacher_data
     c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
     with c1:
         header_dashboard()
     with c2:
-        st.subheader(f"""Welcome,{teacher_data['name']}""")
+        st.subheader(f"""Welcome, {teacher_data['name']} """)
         if st.button("Logout", type='secondary', key='loginbackbtn', shortcut="control+backspace"):
             st.session_state['is_logged_in'] = False
-            del st.session_state.teacher_data
-            st.rerun()   
+            del st.session_state.teacher_data 
+            st.rerun()
+
 
     st.space()
 
@@ -67,7 +75,7 @@ def teacher_dashboard():
         if st.button('Attendance Records',type=type3, width='stretch', icon=':material/cards_stack:'):
             st.session_state.current_teacher_tab = 'attendance_records'
             st.rerun()
-    
+
 
     st.divider()
 
@@ -78,11 +86,15 @@ def teacher_dashboard():
     if st.session_state.current_teacher_tab == "attendance_records":
         teacher_tab_attendance_records()
 
+    
+
+
     footer_dashboard()
 
 def teacher_tab_take_attendance():
     teacher_id = st.session_state.teacher_data['teacher_id']
     st.header('Take AI Attendance')
+
 
     if 'attendance_images' not in st.session_state:
         st.session_state.attendance_images = []
@@ -110,31 +122,30 @@ def teacher_tab_take_attendance():
 
     if st.session_state.attendance_images:
         st.header('Added Photos')
-
         gallery_cols = st.columns(4)
 
-
         for idx, img in enumerate(st.session_state.attendance_images):
-            with gallery_cols[idx % 4]:
+            with gallery_cols[idx % 4 ]:
                 st.image(img, width='stretch', caption=f'Photo {idx+1}')
     has_photos = bool(st.session_state.attendance_images)
-
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        if st.button("Clear all photos", width='stretch', type='tertiary', icon=':material/delete:', disabled=not has_photos):
-           st.session_state.attendance_images = []
-           st.rerun() 
+        if st.button('Clear all photos', width='stretch', type='tertiary', icon=':material/delete:', disabled=not has_photos):
+            st.session_state.attendance_images = []
+            st.rerun()
+
 
     with c2:
-
-       if st.button('Run Face Analysis', width='stretch', type='secondary', icon=':material/analytics:', disabled=not has_photos):
+        
+        if st.button('Run Face Analysis', width='stretch', type='secondary', icon=':material/analytics:', disabled=not has_photos):
             with st.spinner('Deep scanning classroom photos...'):
                 all_detected_ids = {}
 
                 for idx, img in enumerate(st.session_state.attendance_images):
                     img_np = np.array(img.convert('RGB'))
                     detected, _, _ = predict_attendance(img_np)
+
 
                     if detected:
                         for sid in detected.keys():
@@ -179,7 +190,16 @@ def teacher_tab_take_attendance():
         if st.button('Use Voice Attendance', type='primary', width='stretch', icon=':material/mic:'):
             voice_attendance_dialog(selected_subject_id)
 
-    
+
+
+
+
+
+
+
+
+
+
 def teacher_tab_manage_subjects():
     teacher_id = st.session_state.teacher_data['teacher_id']
     col1, col2 = st.columns(2)
@@ -189,6 +209,7 @@ def teacher_tab_manage_subjects():
     with col2:
         if st.button('Create New Subject', width='stretch'):
             create_subject_dialog(teacher_id)
+
 
     # LIST all SUBJECTS
     subjects = get_teacher_subjects(teacher_id)
@@ -212,7 +233,6 @@ def teacher_tab_manage_subjects():
         )
     else:
         st.info("NO SUBJECTS FOUND. CREATE ONE ABOVE")
-
 
 
 def teacher_tab_attendance_records():
@@ -263,37 +283,42 @@ def teacher_tab_attendance_records():
     
     st.dataframe(display_df, width='stretch', hide_index=True)
 
-    
 
-def login_teacher(username,password):
+def login_teacher(username, password):
     if not username or not password:
         return False
-    teacher = teacher_login(username,password)
+    
+    teacher = teacher_login(username, password)
 
     if teacher:
-        st.session_state.user_role='teacher'
+        st.session_state.user_role ='teacher'
         st.session_state.teacher_data = teacher
         st.session_state.is_logged_in = True
         return True
-    return False
+    
 
+    return False
 def teacher_screen_login():
     c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
     with c1:
         header_dashboard()
     with c2:
-        if st.button("Go back to Home ", type='secondary', key='loginbackbtn', shortcut="control+backspace"):
+        if st.button("Go back to Home", type='secondary', key='loginbackbtn', shortcut="control+backspace"):
             st.session_state['login_type'] = None
-            st.rerun()      
-    st.header("Login using password", text_alignment='center')
+            st.rerun()
+
+    st.header('Login using password', text_alignment='center')
     st.space()
     st.space()
-    teacher_username = st.text_input("Enter username", placeholder='shreeshail')
-    teacher_pass = st.text_input('Enter password',type='password',placeholder='Enter password')
+
+
+    teacher_username = st.text_input("Enter username", placeholder='ananyaroy')
+
+    teacher_pass = st.text_input("Enter password", type='password', placeholder="Enter password")
 
     st.divider()
 
-    btnc1,btnc2 = st.columns(2)
+    btnc1, btnc2 = st.columns(2)
 
     with btnc1:
         if st.button('Login', icon=':material/passkey:', shortcut='control+enter', width='stretch'):
@@ -304,12 +329,13 @@ def teacher_screen_login():
                 st.rerun()
             else:
                 st.error("Invalid username and password combo")
+
     with btnc2:
-        if st.button('Register Instead',type='primary', icon=':material/passkey:',width='stretch'):
+        if st.button('Register Instead', type="primary", icon=':material/passkey:', width='stretch'):
             st.session_state.teacher_login_type = 'register'
-            st.rerun()
 
     footer_dashboard()
+
 
 
 def register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_confirm):
@@ -325,7 +351,8 @@ def register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_
         return True, "Sucessfully Created! Login Now"
     except Exception as e:
         return False, "Unexpected Error!"
-      
+    
+
 def teacher_screen_register():
     c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
     with c1:
@@ -334,23 +361,30 @@ def teacher_screen_register():
         if st.button("Go back to Home", type='secondary', key='loginbackbtn', shortcut="control+backspace"):
             st.session_state['login_type'] = None
             st.rerun()
-                
-    st.header("Register your teacher profile")
+
+
+
+    st.header('Register your teacher profile')
+
+    st.space()
+    st.space()
+
     
-    st.space()
-    st.space()
-    teacher_username = st.text_input("Enter username", placeholder='shreeshail')
-    teacher_name = st.text_input("Enter name", placeholder='shreeshail')
-    teacher_pass = st.text_input('Enter password',type='password',placeholder='Enter password')
-    teacher_pass_confirm = st.text_input('Confirm your password',type='password',placeholder='Enter password')
+    teacher_username = st.text_input("Enter username", placeholder='ananyaroy')
+
+    teacher_name = st.text_input("Enter name", placeholder='Ananya Roy')
+
+    teacher_pass = st.text_input("Enter password", type='password', placeholder="Enter password")
+
+    teacher_pass_confirm = st.text_input("Confirm your password", type='password', placeholder="Enter password")
 
     st.divider()
 
-    btnc1,btnc2 = st.columns(2)
+    btnc1, btnc2 = st.columns(2)
 
     with btnc1:
-        if st.button('Register now', icon=':material/passkey:',shortcut='control+enter',width='stretch'):
-            success, message = register_teacher(teacher_username,teacher_name,teacher_pass,teacher_pass_confirm)
+        if st.button('Register now', icon=':material/passkey:', shortcut='control+enter', width='stretch'):
+            success, message = register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_confirm)
             if success:
                 st.success(message)
                 import time
@@ -360,9 +394,9 @@ def teacher_screen_register():
             else:
                 st.error(message)
 
+
     with btnc2:
-        if st.button('Login Instead',type='primary', icon=':material/passkey:',width='stretch'):
+        if st.button('Login Instead', type="primary", icon=':material/passkey:', width='stretch'):
             st.session_state.teacher_login_type = 'login'
-            st.rerun()
 
     footer_dashboard()
