@@ -44,7 +44,7 @@ def identify_speaker(new_embedding, candidates_dict, threshold=0.65):
 
 
 
-def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.65):
+def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.54):
 
     try:
         encoder = load_voice_encoder()

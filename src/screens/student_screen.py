@@ -6,7 +6,7 @@ from src.components.header import header_dashboard
 from src.components.footer import footer_dashboard
 from PIL import Image
 import numpy as np
-from src.pipelines.face_pipeline import predict_attendance, get_face_embeddings, train_classifier
+from src.pipelines.face_pipeline import predict_attendance, get_face_embeddings, train_classifier,get_trained_model
 from src.pipelines.voice_pipeline import get_voice_embedding
 from src.database.db import get_all_students, create_student, get_student_subjects, get_student_attendance, unenroll_student_to_subject
 import time
@@ -142,7 +142,7 @@ def student_screen():
     if show_registration:
         with st.container(border=True):
             st.header('Register new Profile')
-            new_name = st.text_input("Enter your name", placeholder='E.g. Hamza Rizvi')
+            new_name = st.text_input("Enter your name", placeholder='E.g. shreeshail singare')
 
             st.subheader('Optional : Voice Enrollment')
             st.info("Enroll your for voice only attendance")
@@ -151,7 +151,7 @@ def student_screen():
             audio_data = None
 
             try:
-                audio_data = st.audio_input('Record a short phrase like I am present, My name is Akash.')
+                audio_data = st.audio_input('Record a short phrase like I am present, My name is Rakesh.')
             except Exception:
                 st.error('Audio Data failed!')
 
@@ -168,6 +168,9 @@ def student_screen():
                                 voice_emb = get_voice_embedding(audio_data.read())
 
                             response_data = create_student(new_name, face_embedding=face_emb, voice_embedding=voice_emb)
+
+                            get_trained_model()
+                            
 
                             if response_data:
                                 train_classifier()

@@ -37,7 +37,7 @@ def get_face_embeddings(image_np):
         encodings.append(np.array(face_descriptor))
     return encodings
 
-@st.cache_resource
+
 def get_trained_model():
     X = []
     y = []
@@ -68,39 +68,63 @@ def get_trained_model():
 
 
 def train_classifier():
-    st.cache_resource.clear()
-    model_data = get_trained_model()
-    return bool(model_data)
+    return bool(get_trained_model())
 
 def predict_attendance(class_image_np):
     encodings = get_face_embeddings(class_image_np)
-
     detected_student = {}
-
 
     model_data = get_trained_model()
 
-    if not model_data:
+    if not model_data or len(encodings) == 0:
         return detected_student, [], len(encodings)
     
     clf = model_data['clf']
-    X_train = model_data['X']
+    
+    X_train = np.array(model_data['X'], dtype=np.float64)
     y_train = model_data['y']
 
     all_students = sorted(list(set(y_train)))
 
+    
+    RESEMBLED_THRESHOLD = 0.42
+
     for encoding in encodings:
-        if len(all_students)>= 2:
-            predicted_id= int(clf.predict([encoding])[0])
+        
+        encoding_np = np.array(encoding, dtype=np.float64).reshape(1, -1)
+        
+        distances = np.linalg.norm(X_train - encoding_np, axis=1)
+        best_match_idx = np.argmin(distances)
+        min_distance = distances[best_match_idx]
+
+        print("DISTANCES:", distances)
+        print("MIN DIST:", min_distance)
+
+        closest_student_id = int(y_train[best_match_idx])
+
+
+
+        
+        print(f"[DEBUG PIPELINE] Nearest ID: {closest_student_id} | Computed Distance: {min_distance:.4f}")
+
+        
+        if min_distance <= RESEMBLED_THRESHOLD:
+            
+            
+            if clf is not None and len(all_students) >= 2:
+                predicted_id = int(clf.predict(encoding_np)[0])
+                
+                
+                if predicted_id == closest_student_id:
+                    detected_student[predicted_id] = True
+                else:
+                    
+                    detected_student[closest_student_id] = True
+            else:
+                
+                detected_student[closest_student_id] = True
         else:
-            predicted_id = int(all_students[0])
+        
+            print(f"[DEBUG PIPELINE] Unrecognized profile detected. Prompting registration flow.")
 
-        student_embedding = X_train[y_train.index(predicted_id)]
-
-        best_match_score = np.linalg.norm(student_embedding - encoding)
-
-        resemblance_threshold = 0.6
-
-        if best_match_score <= resemblance_threshold:
-            detected_student[predicted_id] = True
     return detected_student, all_students, len(encodings)
