@@ -430,4 +430,4 @@ When adding a feature, update this README if it changes setup, configuration,
 the data model, deployment, or a recognition workflow.
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
