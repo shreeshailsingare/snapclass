@@ -430,9 +430,4 @@ When adding a feature, update this README if it changes setup, configuration,
 the data model, deployment, or a recognition workflow.
 
 ## License
-
-No `LICENSE` file or license declaration is currently included. For an
-open-source portfolio project, **MIT License** is recommended because it is
-permissive and straightforward for educational and commercial reuse. Add a
-`LICENSE` file with the official MIT text before distributing the project under
-that license.
+This project is licensed under the MIT License. See the LICENSE file for details.
